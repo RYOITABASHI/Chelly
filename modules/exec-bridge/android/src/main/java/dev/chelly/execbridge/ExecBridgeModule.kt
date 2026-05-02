@@ -12,7 +12,10 @@ class ExecBridgeModule : Module() {
             val linkerPath = findLinker()
             val bashPath = findBash()
             val ldLibPath = findLdLibPath()
-            val homePath = System.getenv("HOME") ?: "/data/data/dev.chelly.app/files"
+            val filesDir = appContext.reactContext?.filesDir
+                ?: throw RuntimeException("React context filesDir unavailable")
+            val homePath = File(filesDir, "home").absolutePath
+            File(homePath).mkdirs()
             val workDir = if (cwd.isNotEmpty()) cwd else "$homePath/chelly/workspace"
             File(workDir).mkdirs()
 

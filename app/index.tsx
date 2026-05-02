@@ -1,14 +1,18 @@
 import { useCallback, useMemo } from "react";
 import { View, KeyboardAvoidingView, Platform } from "react-native";
+import { useRouter } from "expo-router";
 import { useChatStore } from "@/store/chat-store";
 import { useSettingsStore } from "@/store/settings-store";
 import { useAiDispatch } from "@/hooks/use-ai-dispatch";
+import { executeCommandList } from "@/lib/command-executor";
+import { buildSoundReactiveArtSampleCommands, SOUND_ART_SAMPLE_PATH } from "@/lib/sample-labs";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatHeader } from "@/components/ChatHeader";
 import { ChatMessageList } from "@/components/ChatMessageList";
 import { CommandInput } from "@/components/CommandInput";
 
 export default function ChatScreen() {
+  const router = useRouter();
   const isOnboarded = useSettingsStore((s) => s.isOnboarded);
   const isSettingsLoaded = useSettingsStore((s) => s.isLoaded);
   const isChatLoaded = useChatStore((s) => s.isLoaded);
@@ -51,6 +55,16 @@ export default function ChatScreen() {
     [ensureSession, dispatch],
   );
 
+  const handleOpenSample = useCallback(async () => {
+    ensureSession();
+    const cwd = useSettingsStore.getState().currentCwd;
+    await executeCommandList(buildSoundReactiveArtSampleCommands(), cwd);
+    router.push({
+      pathname: "/preview",
+      params: { path: SOUND_ART_SAMPLE_PATH },
+    });
+  }, [ensureSession, router]);
+
   // Clear chat — delete current session and create a fresh one
   const handleClearChat = useCallback(() => {
     if (session) {
@@ -61,15 +75,24 @@ export default function ChatScreen() {
 
   // Safety confirm handlers
   const handleApprove = useCallback(
-    (msgId: string) => {
+    async (msgId: string) => {
       if (!session) return;
+      const message = session.messages.find((m) => m.id === msgId);
+      if (!message?.safetyConfirm) return;
+      const commands = message.safetyConfirm.commands;
+      const cwd = useSettingsStore.getState().currentCwd;
+
       updateMessage(session.id, msgId, {
         safetyConfirm: {
-          ...session.messages.find((m) => m.id === msgId)?.safetyConfirm!,
+          ...message.safetyConfirm,
           status: "approved",
         },
       });
-      // Re-dispatch could be added here for auto-execution after approval
+
+      if (commands.length > 0) {
+        const executions = await executeCommandList(commands, cwd);
+        updateMessage(session.id, msgId, { executions });
+      }
     },
     [session, updateMessage],
   );
@@ -106,6 +129,8 @@ export default function ChatScreen() {
       <View className="flex-1">
         <ChatMessageList
           messages={session?.messages ?? []}
+          onStarterPress={handleSend}
+          onOpenSample={handleOpenSample}
           onApprove={handleApprove}
           onReject={handleReject}
         />

@@ -6,6 +6,10 @@ const BLOCKLIST = [
   /\bdd\s+if=/,
   /\bcurl\s.*\|\s*(sh|bash)/,
   /\bwget\s.*\|\s*(sh|bash)/,
+  /\b(cat|printenv|env)\b.*(API_KEY|TOKEN|SECRET|PASSWORD|AUTH)/i,
+  /\b(chmod|chown)\s+.*(\.ssh|\.config|\.credentials|auth\.json|token|key)/i,
+  /\b(git\s+push|gh\s+auth|gh\s+secret|npm\s+publish)\b/,
+  /\/sdcard\/Download\/.*(credential|token|secret|auth|key)/i,
 ];
 
 const DESTRUCTIVE_PATTERNS = [

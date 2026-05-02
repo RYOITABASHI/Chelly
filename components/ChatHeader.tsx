@@ -15,9 +15,14 @@ export function ChatHeader({ onClearChat }: Props) {
       className="bg-zinc-900 border-b border-zinc-800 px-4 pb-3 flex-row items-center justify-between"
       style={{ paddingTop: insets.top + 8 }}
     >
-      <Text className="text-white text-lg font-bold font-mono tracking-wider">
-        Chelly
-      </Text>
+      <View>
+        <Text className="text-white text-lg font-bold font-mono tracking-wider">
+          Chelly
+        </Text>
+        <Text className="text-zinc-500 text-[10px] uppercase tracking-widest">
+          AI STEAM Lab
+        </Text>
+      </View>
       <View className="flex-row items-center gap-4">
         {/* Clear chat */}
         <Pressable

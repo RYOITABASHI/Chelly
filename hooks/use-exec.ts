@@ -11,7 +11,7 @@ export function useExec() {
   const exec = useCallback(async (command: string, timeoutMs?: number): Promise<ExecResult> => {
     const cdMatch = command.match(/^cd\s+(.+)$/);
     if (cdMatch) {
-      const target = cdMatch[1].replace(/^~/, "/data/data/com.termux/files/home");
+      const target = cdMatch[1].replace(/^~/, "/data/data/dev.chelly.app/files/home");
       const result = await execCommand(`cd ${target} && pwd`, cwd, timeoutMs);
       if (result.exitCode === 0) {
         setCwd(result.stdout.trim());

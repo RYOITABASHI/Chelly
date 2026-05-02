@@ -134,8 +134,8 @@ Java_dev_chelly_execbridge_ChellyJNI_execSubprocess(
          * environ pointer used by execve(). */
         char pathBuf[2048];
         snprintf(pathBuf, sizeof(pathBuf),
-                 "PATH=%s:%s/node_modules/npm/bin:%s/node_modules/.bin:/usr/bin:/usr/sbin:/bin:/sbin",
-                 ldLibPath, ldLibPath, ldLibPath);
+                 "PATH=%s/chelly/bin:%s/.local/bin:%s:%s/node_modules/npm/bin:%s/node_modules/.bin:/system/bin:/system/xbin:/usr/bin:/usr/sbin:/bin:/sbin",
+                 homePath, homePath, ldLibPath, ldLibPath, ldLibPath);
 
         char homeBuf[512];
         snprintf(homeBuf, sizeof(homeBuf), "HOME=%s", homePath);

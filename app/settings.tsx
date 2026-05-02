@@ -129,11 +129,36 @@ export default function SettingsScreen() {
           </View>
           <Pressable
             onPress={() =>
-              settings.setCwd("/data/data/com.termux/files/home/chelly/workspace")
+              settings.setCwd("/data/data/dev.chelly.app/files/home/chelly/workspace")
             }
             className="bg-zinc-800 rounded-xl py-2.5 items-center active:opacity-60 mb-6"
           >
             <Text className="text-zinc-400 text-sm">Reset CWD</Text>
+          </Pressable>
+
+          {/* Safety */}
+          <Text className="text-zinc-400 text-xs font-mono uppercase tracking-wider mb-3">
+            Safety
+          </Text>
+          <Pressable
+            onPress={() => settings.setAutoApproveActions(!settings.autoApproveActions)}
+            className={`rounded-xl p-4 border mb-6 ${
+              settings.autoApproveActions
+                ? "border-yellow-500 bg-yellow-600/10"
+                : "border-zinc-800 bg-zinc-900"
+            }`}
+          >
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-zinc-100 font-semibold">Advanced auto-run</Text>
+              <Text className={settings.autoApproveActions ? "text-yellow-300" : "text-zinc-500"}>
+                {settings.autoApproveActions ? "ON" : "OFF"}
+              </Text>
+            </View>
+            <Text className="text-zinc-500 text-xs leading-5">
+              OFF is recommended for kids and classrooms. When ON, Chelly can run
+              approved-safe build actions without showing a confirmation card.
+              Destructive or blocked actions are still refused.
+            </Text>
           </Pressable>
         </View>
       </ScrollView>

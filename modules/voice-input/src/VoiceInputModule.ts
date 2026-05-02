@@ -12,9 +12,9 @@ export function stopListening(): void {
 }
 
 export function addResultListener(callback: (event: { text: string }) => void) {
-  return emitter.addListener("onResult", callback);
+  return (emitter as any).addListener("onResult", callback);
 }
 
 export function addErrorListener(callback: (event: { message: string }) => void) {
-  return emitter.addListener("onError", callback);
+  return (emitter as any).addListener("onError", callback);
 }

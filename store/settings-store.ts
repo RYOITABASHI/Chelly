@@ -13,6 +13,7 @@ type SettingsStore = {
   perplexityApiKey: string;
   localLlmUrl: string;
   currentCwd: string;
+  autoApproveActions: boolean;
   isOnboarded: boolean;
   isLoaded: boolean;
   load: () => Promise<void>;
@@ -20,11 +21,20 @@ type SettingsStore = {
   setApiKey: (provider: Provider, key: string) => Promise<void>;
   setActiveProvider: (provider: Provider) => void;
   setCwd: (cwd: string) => void;
+  setAutoApproveActions: (enabled: boolean) => void;
   setOnboarded: () => void;
 };
 
-const DEFAULT_CWD = "/data/data/com.termux/files/home/chelly/workspace";
+const CHELLY_HOME = "/data/data/dev.chelly.app/files/home";
+const DEFAULT_CWD = `${CHELLY_HOME}/chelly/workspace`;
 const SETTINGS_KEY = "chelly_settings";
+
+function normalizeCwd(cwd: string | undefined): string {
+  if (!cwd) return DEFAULT_CWD;
+  // Migrate old prototype settings that assumed Termux as the host runtime.
+  if (cwd.includes("/data/data/com.termux/")) return DEFAULT_CWD;
+  return cwd;
+}
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
   activeProvider: "gemini",
@@ -35,6 +45,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   perplexityApiKey: "",
   localLlmUrl: "",
   currentCwd: DEFAULT_CWD,
+  autoApproveActions: false,
   isOnboarded: false,
   isLoaded: false,
 
@@ -50,7 +61,8 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       set({
         activeProvider: data.activeProvider ?? "gemini",
         localLlmUrl: data.localLlmUrl ?? "",
-        currentCwd: data.currentCwd ?? DEFAULT_CWD,
+        currentCwd: normalizeCwd(data.currentCwd),
+        autoApproveActions: data.autoApproveActions ?? false,
         isOnboarded: data.isOnboarded ?? false,
         geminiApiKey, claudeApiKey, groqApiKey, cerebrasApiKey, perplexityApiKey,
         isLoaded: true,
@@ -64,6 +76,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       activeProvider: s.activeProvider,
       localLlmUrl: s.localLlmUrl,
       currentCwd: s.currentCwd,
+      autoApproveActions: s.autoApproveActions,
       isOnboarded: s.isOnboarded,
     }));
   },
@@ -75,5 +88,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   setActiveProvider: (provider) => { set({ activeProvider: provider }); get().save(); },
   setCwd: (cwd) => { set({ currentCwd: cwd }); get().save(); },
+  setAutoApproveActions: (enabled) => { set({ autoApproveActions: enabled }); get().save(); },
   setOnboarded: () => { set({ isOnboarded: true }); get().save(); },
 }));

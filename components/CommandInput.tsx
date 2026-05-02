@@ -39,7 +39,7 @@ export function CommandInput({ onSend, isStreaming, onCancel }: Props) {
             ref={inputRef}
             value={text}
             onChangeText={setText}
-            placeholder="何でも聞いてください..."
+            placeholder="作りたいものを書いてください..."
             placeholderTextColor="#71717a"
             className="text-white text-sm"
             multiline

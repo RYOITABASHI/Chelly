@@ -2,8 +2,8 @@
  * hooks/use-ai-dispatch.ts
  *
  * Core AI dispatch hook for Chelly.
- * Routes user messages to LLM providers, parses responses,
- * classifies commands for safety, and executes them.
+ * Routes user messages to LLM providers, parses responses, and converts
+ * proposed local actions into explicit approval cards.
  */
 
 import { useCallback, useRef } from "react";
@@ -11,13 +11,11 @@ import {
   useChatStore,
   type ChatMessage,
   type ChatAgent,
-  type CommandExecution,
 } from "@/store/chat-store";
 import { useSettingsStore } from "@/store/settings-store";
 import { buildSystemPrompt } from "@/lib/system-prompt";
-import { classifyCommand, getBlockMessage } from "@/lib/command-safety";
+import { executeCommandList } from "@/lib/command-executor";
 import { generateId } from "@/lib/id";
-import { execCommand } from "@/modules/exec-bridge";
 import { geminiChatStream, type GeminiMessage } from "@/lib/gemini";
 import { claudeChatStream, type ClaudeMessage } from "@/lib/claude";
 import { groqChatStream, type GroqMessage } from "@/lib/groq";
@@ -43,6 +41,7 @@ interface SettingsSnapshot {
   perplexityApiKey: string;
   localLlmUrl: string;
   currentCwd: string;
+  autoApproveActions: boolean;
 }
 
 // ─── Provider routing ───────────────────────────────────────────────────────
@@ -224,58 +223,6 @@ function tryParseCommands(response: string): ParsedResponse | null {
   return null;
 }
 
-// ─── Command execution ──────────────────────────────────────────────────────
-
-/**
- * Execute a list of commands with safety classification.
- * BLOCKED commands are skipped. DESTRUCTIVE commands are logged but still
- * executed (confirmation UI will be wired in a later task).
- */
-async function executeCommands(
-  commands: Array<{ cmd: string; desc: string }>,
-  cwd: string,
-): Promise<CommandExecution[]> {
-  const results: CommandExecution[] = [];
-
-  for (const { cmd, desc } of commands) {
-    const safety = classifyCommand(cmd);
-
-    if (safety === "BLOCKED") {
-      results.push({
-        command: cmd,
-        output: getBlockMessage(),
-        exitCode: 1,
-        isCollapsed: false,
-      });
-      continue;
-    }
-
-    if (safety === "DESTRUCTIVE") {
-      console.warn(`[AI Dispatch] Executing destructive command: ${cmd}`);
-    }
-
-    try {
-      const result = await execCommand(cmd, cwd, 30000);
-      const output = [result.stdout, result.stderr].filter(Boolean).join("\n");
-      results.push({
-        command: cmd,
-        output: output || "(no output)",
-        exitCode: result.exitCode,
-        isCollapsed: false,
-      });
-    } catch (err) {
-      results.push({
-        command: cmd,
-        output: err instanceof Error ? err.message : String(err),
-        exitCode: 1,
-        isCollapsed: false,
-      });
-    }
-  }
-
-  return results;
-}
-
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export function useAiDispatch() {
@@ -344,14 +291,25 @@ export function useAiDispatch() {
       const parsed = tryParseCommands(fullResponse);
 
       if (parsed && parsed.commands.length > 0) {
-        // Has commands — execute them
-        const executions = await executeCommands(
-          parsed.commands,
-          settings.currentCwd,
-        );
+        if (settings.autoApproveActions) {
+          const executions = await executeCommandList(parsed.commands, settings.currentCwd);
+          chatStore.updateMessage(session.id, assistantId, {
+            content: parsed.explanation || fullResponse,
+            executions,
+            isStreaming: false,
+            streamingText: undefined,
+          });
+          return;
+        }
+
+        // Education mode is approval-first by default: the AI may propose
+        // actions, but Chelly does not execute them until explicit approval.
         chatStore.updateMessage(session.id, assistantId, {
           content: parsed.explanation || fullResponse,
-          executions,
+          safetyConfirm: {
+            commands: parsed.commands,
+            status: "pending",
+          },
           isStreaming: false,
           streamingText: undefined,
         });

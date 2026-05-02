@@ -1,15 +1,36 @@
 import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
+import { useRouter } from "expo-router";
 import type { CommandExecution } from "@/store/chat-store";
+import { extractFirstPreviewPath } from "@/lib/preview-artifact";
 
 type Props = { executions: CommandExecution[] };
 
 export function ExecutionCard({ executions }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const router = useRouter();
   const allSuccess = executions.every((e) => e.exitCode === 0);
+  const previewPath = extractFirstPreviewPath(executions.map((e) => e.output));
 
   return (
-    <Pressable onPress={() => setExpanded(!expanded)} className="mt-2">
+    <View className="mt-2">
+      {previewPath ? (
+        <Pressable
+          onPress={() =>
+            router.push({
+              pathname: "/preview",
+              params: { path: previewPath },
+            })
+          }
+          className="bg-emerald-600 rounded-xl px-4 py-3 mb-2 active:opacity-70"
+        >
+          <Text className="text-white font-bold text-sm text-center">
+            ▶ 作品を開く
+          </Text>
+        </Pressable>
+      ) : null}
+
+      <Pressable onPress={() => setExpanded(!expanded)}>
       <View className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
         <View className="flex-row items-center gap-2">
           <Text className={allSuccess ? "text-green-400" : "text-red-400"}>
@@ -44,6 +65,7 @@ export function ExecutionCard({ executions }: Props) {
             </View>
           ))}
       </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }

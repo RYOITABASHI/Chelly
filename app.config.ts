@@ -8,8 +8,9 @@ const config: ExpoConfig = {
   icon: "./assets/icon.png",
   scheme: "chelly",
   userInterfaceStyle: "automatic",
-  newArchEnabled: true,
+  newArchEnabled: false,
   android: {
+    jsEngine: "jsc",
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#000000",
@@ -17,7 +18,7 @@ const config: ExpoConfig = {
     package: "dev.chelly.app",
     permissions: ["android.permission.RECORD_AUDIO"],
   },
-  plugins: ["expo-secure-store", "expo-router", "./modules/exec-bridge", "./modules/voice-input"],
+  plugins: ["expo-secure-store", "expo-router"],
 };
 
 export default config;
