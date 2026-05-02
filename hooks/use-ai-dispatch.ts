@@ -44,6 +44,27 @@ interface SettingsSnapshot {
   autoApproveActions: boolean;
 }
 
+function missingCredentialMessage(settings: SettingsSnapshot): string | null {
+  switch (settings.activeProvider) {
+    case "gemini":
+      return settings.geminiApiKey
+        ? null
+        : "Gemini APIキーが未設定です。まずSettingsでAPIキーを入れるか、ラボ一覧から「サンプルアートを開く」を使ってAPIキーなしデモを試してください。";
+    case "claude":
+      return settings.claudeApiKey ? null : "Claude APIキーが未設定です。SettingsでAPIキーを設定してください。";
+    case "groq":
+      return settings.groqApiKey ? null : "Groq APIキーが未設定です。SettingsでAPIキーを設定してください。";
+    case "cerebras":
+      return settings.cerebrasApiKey ? null : "Cerebras APIキーが未設定です。SettingsでAPIキーを設定してください。";
+    case "perplexity":
+      return settings.perplexityApiKey ? null : "Perplexity APIキーが未設定です。SettingsでAPIキーを設定してください。";
+    case "local":
+      return settings.localLlmUrl ? null : "Local LLM URLが未設定です。SettingsでローカルLLMのURLを設定してください。";
+    default:
+      return null;
+  }
+}
+
 // ─── Provider routing ───────────────────────────────────────────────────────
 
 async function routeToProvider(
@@ -255,6 +276,17 @@ export function useAiDispatch() {
       agent: settings.activeProvider as ChatAgent,
     };
     chatStore.addMessage(session.id, assistantMsg);
+
+    const credentialError = missingCredentialMessage(settings);
+    if (credentialError) {
+      chatStore.updateMessage(session.id, assistantId, {
+        content: credentialError,
+        isStreaming: false,
+        streamingText: undefined,
+        agent: settings.activeProvider as ChatAgent,
+      });
+      return;
+    }
 
     // 3. Build context (last 20 messages, 500 char truncation)
     const history = session.messages.slice(-20).map((m) => ({

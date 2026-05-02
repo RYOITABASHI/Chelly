@@ -73,6 +73,13 @@ export default function ChatScreen() {
     createSession("New Chat");
   }, [session, deleteSession, createSession]);
 
+  const handleBackToLabs = useCallback(() => {
+    if (session?.messages.length) {
+      deleteSession(session.id);
+      createSession("New Chat");
+    }
+  }, [session, deleteSession, createSession]);
+
   // Safety confirm handlers
   const handleApprove = useCallback(
     async (msgId: string) => {
@@ -125,7 +132,11 @@ export default function ChatScreen() {
       className="flex-1 bg-black"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ChatHeader onClearChat={handleClearChat} />
+      <ChatHeader
+        onClearChat={handleClearChat}
+        onBackToLabs={handleBackToLabs}
+        showBackToLabs={(session?.messages.length ?? 0) > 0}
+      />
       <View className="flex-1">
         <ChatMessageList
           messages={session?.messages ?? []}

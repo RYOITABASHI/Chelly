@@ -2,12 +2,20 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { WebView } from "react-native-webview";
-import { execCommand } from "@/modules/exec-bridge";
+import { File } from "expo-file-system";
+import { useSettingsStore } from "@/store/settings-store";
+
+function resolvePreviewPath(path: string, cwd: string): string {
+  if (path.startsWith("file://")) return path;
+  if (path.startsWith("/")) return `file://${path}`;
+  return `file://${cwd.replace(/\/+$/, "")}/${path.replace(/^\.?\//, "")}`;
+}
 
 export default function PreviewScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ path?: string }>();
   const filePath = typeof params.path === "string" ? params.path : "";
+  const cwd = useSettingsStore((s) => s.currentCwd);
   const [html, setHtml] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -23,14 +31,11 @@ export default function PreviewScreen() {
       return;
     }
 
-    execCommand(`cat ${JSON.stringify(filePath)}`)
+    const fileUri = resolvePreviewPath(filePath, cwd);
+    new File(fileUri).text()
       .then((result) => {
         if (cancelled) return;
-        if (result.exitCode !== 0) {
-          setError(result.stderr || result.stdout || "Failed to read preview file.");
-        } else {
-          setHtml(result.stdout);
-        }
+        setHtml(result);
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : String(err));
@@ -42,7 +47,7 @@ export default function PreviewScreen() {
     return () => {
       cancelled = true;
     };
-  }, [filePath]);
+  }, [cwd, filePath]);
 
   return (
     <>
@@ -72,7 +77,7 @@ export default function PreviewScreen() {
         ) : (
           <WebView
             originWhitelist={["*"]}
-            source={{ html, baseUrl: `file://${filePath}` }}
+            source={{ html, baseUrl: resolvePreviewPath(filePath, cwd) }}
             javaScriptEnabled
             domStorageEnabled
             allowsInlineMediaPlayback

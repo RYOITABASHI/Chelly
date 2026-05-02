@@ -17,7 +17,12 @@ object ChellyJNI {
         val workDir = File(if (cwd.isNotEmpty()) cwd else homePath)
         workDir.mkdirs()
 
-        val processBuilder = ProcessBuilder(linkerPath, bashPath, "-c", command)
+        val commandLine = if (bashPath.endsWith(".so")) {
+            listOf(linkerPath, bashPath, "-c", command)
+        } else {
+            listOf(bashPath, "-c", command)
+        }
+        val processBuilder = ProcessBuilder(commandLine)
             .directory(workDir)
             .redirectInput(ProcessBuilder.Redirect.PIPE)
         processBuilder.environment().apply {
@@ -42,7 +47,12 @@ object ChellyJNI {
                     "/sbin",
                 ).joinToString(":")
             )
-            put("LD_PRELOAD", "$ldLibPath/libexec_wrapper.so")
+            val preload = File(ldLibPath, "libexec_wrapper.so")
+            if (bashPath.endsWith(".so") && preload.exists()) {
+                put("LD_PRELOAD", preload.absolutePath)
+            } else {
+                remove("LD_PRELOAD")
+            }
         }
 
         val process = processBuilder.start()
