@@ -8,9 +8,8 @@ const config: ExpoConfig = {
   icon: "./assets/icon.png",
   scheme: "chelly",
   userInterfaceStyle: "automatic",
-  newArchEnabled: false,
+  newArchEnabled: true,
   android: {
-    jsEngine: "jsc",
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#000000",
