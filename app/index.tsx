@@ -127,10 +127,15 @@ export default function ChatScreen() {
     return <WelcomeScreen />;
   }
 
+  const RootView = Platform.OS === "ios" ? KeyboardAvoidingView : View;
+  const rootProps = Platform.OS === "ios"
+    ? { behavior: "padding" as const }
+    : {};
+
   return (
-    <KeyboardAvoidingView
+    <RootView
       className="flex-1 bg-black"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      {...rootProps}
     >
       <ChatHeader
         onClearChat={handleClearChat}
@@ -151,6 +156,6 @@ export default function ChatScreen() {
         isStreaming={isStreaming}
         onCancel={cancel}
       />
-    </KeyboardAvoidingView>
+    </RootView>
   );
 }

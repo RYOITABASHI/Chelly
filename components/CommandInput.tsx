@@ -1,5 +1,6 @@
-import { useState, useRef } from "react";
-import { View, TextInput, Pressable, Text } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Keyboard, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = {
   onSend: (text: string) => void;
@@ -9,7 +10,23 @@ type Props = {
 
 export function CommandInput({ onSend, isStreaming, onCancel }: Props) {
   const [text, setText] = useState("");
+  const [keyboardInset, setKeyboardInset] = useState(0);
   const inputRef = useRef<TextInput>(null);
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+
+    const show = Keyboard.addListener("keyboardDidShow", (event) => {
+      setKeyboardInset(Math.max(0, event.endCoordinates.height - insets.bottom));
+    });
+    const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboardInset(0));
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, [insets.bottom]);
 
   const handleSend = () => {
     const trimmed = text.trim();
@@ -23,7 +40,13 @@ export function CommandInput({ onSend, isStreaming, onCancel }: Props) {
   };
 
   return (
-    <View className="bg-zinc-900 border-t border-zinc-800 px-3 py-2 pb-6">
+    <View
+      className="bg-zinc-900 border-t border-zinc-800 px-3 pt-2"
+      style={{
+        paddingBottom: Math.max(insets.bottom, 12),
+        marginBottom: keyboardInset,
+      }}
+    >
       <View className="flex-row items-end gap-2">
         {/* Microphone placeholder */}
         <Pressable
