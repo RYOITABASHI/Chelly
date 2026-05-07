@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chelly Web Studio</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #050505;
+        color: #f4f4f5;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #050505;
+      }
+      .shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: minmax(320px, 420px) 1fr;
+      }
+      .sidebar {
+        border-right: 1px solid #27272a;
+        background: #09090b;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .brand, .surface-head {
+        padding: 20px;
+        border-bottom: 1px solid #27272a;
+      }
+      .eyebrow {
+        color: #6ee7b7;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+      }
+      h1, h2, p { margin: 0; }
+      h1 { margin-top: 8px; font-size: 30px; line-height: 1.05; }
+      .muted { color: #71717a; line-height: 1.65; }
+      .chat {
+        flex: 1;
+        padding: 18px;
+        display: grid;
+        align-content: start;
+        gap: 12px;
+        overflow: auto;
+      }
+      .hero-card, .lab, .panel {
+        border: 1px solid #27272a;
+        background: #111113;
+        border-radius: 14px;
+      }
+      .hero-card { padding: 18px; }
+      .hero-card h2 { font-size: 22px; margin: 8px 0; }
+      .sample {
+        border: 0;
+        background: #34d399;
+        color: #04130c;
+        border-radius: 14px;
+        padding: 14px 16px;
+        text-align: left;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .lab {
+        padding: 14px;
+        display: grid;
+        gap: 6px;
+        cursor: pointer;
+      }
+      .lab-title { font-weight: 800; }
+      .composer {
+        padding: 14px;
+        border-top: 1px solid #27272a;
+        display: flex;
+        gap: 10px;
+      }
+      .composer input {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid #27272a;
+        background: #18181b;
+        color: #fff;
+        border-radius: 999px;
+        padding: 13px 16px;
+        font-size: 14px;
+      }
+      .composer button {
+        width: 44px;
+        border: 0;
+        border-radius: 999px;
+        background: #34d399;
+        color: #04130c;
+        font-size: 20px;
+        cursor: pointer;
+      }
+      .main {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background: #050505;
+      }
+      .surface-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: start;
+        background: #09090b;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        padding: 14px 20px;
+        border-bottom: 1px solid #27272a;
+        overflow-x: auto;
+      }
+      .tab {
+        border: 1px solid #27272a;
+        background: #111113;
+        color: #a1a1aa;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 800;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .tab.active { background: #f4f4f5; color: #09090b; border-color: #f4f4f5; }
+      .content {
+        padding: 20px;
+        flex: 1;
+        min-height: 0;
+      }
+      .panel {
+        min-height: 100%;
+        padding: 22px;
+      }
+      .panel h2 { font-size: 26px; margin-bottom: 12px; }
+      pre {
+        white-space: pre-wrap;
+        overflow: auto;
+        background: #050505;
+        border: 1px solid #27272a;
+        border-radius: 12px;
+        padding: 16px;
+        color: #d4d4d8;
+        line-height: 1.55;
+      }
+      .status {
+        margin-top: 14px;
+        color: #a1a1aa;
+        font-size: 14px;
+      }
+      @media (max-width: 860px) {
+        .shell { grid-template-columns: 1fr; }
+        .sidebar { min-height: auto; border-right: 0; }
+        .surface-head { display: block; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="sidebar">
+        <header class="brand">
+          <div class="eyebrow">Local AI STEAM Studio</div>
+          <h1>Chelly Web Studio</h1>
+          <p class="muted" style="margin-top:10px;">Chromebook / Windows first の制作スタジオ初期プレビューです。</p>
+        </header>
+        <div class="chat">
+          <article class="hero-card">
+            <div class="eyebrow">Create first, learn after</div>
+            <h2>何を作って、どう動かしてみる？</h2>
+            <p class="muted">作品、コード、実行ログ、しくみの説明を1つの画面で扱います。</p>
+          </article>
+          <button class="sample" data-tab="preview">サンプルアートを開く</button>
+          <article class="lab" data-tab="explain">
+            <div class="lab-title">音に反応する光のアート</div>
+            <p class="muted">音量、周波数、色、ジェネラティブアート</p>
+          </article>
+          <article class="lab" data-tab="code">
+            <div class="lab-title">月に着陸するロケットゲーム</div>
+            <p class="muted">重力、速度、燃料、条件分岐</p>
+          </article>
+          <article class="lab" data-tab="tweak">
+            <div class="lab-title">模様が生まれるジェネラティブアート</div>
+            <p class="muted">反復、ランダム、周期、パターン</p>
+          </article>
+        </div>
+        <form class="composer" id="composer">
+          <input id="prompt" placeholder="作りたい作品や、変えたい動きを書く..." />
+          <button aria-label="send">↑</button>
+        </form>
+      </section>
+      <section class="main">
+        <header class="surface-head">
+          <div>
+            <h2>Studio Surface</h2>
+            <p class="muted">Chat / Preview / Code / Run Log / Explain / Tweak</p>
+          </div>
+          <p class="muted">Static preview build: visible check</p>
+        </header>
+        <nav class="tabs" id="tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="runlog">Run Log</button>
+          <button class="tab" data-tab="explain">Explain</button>
+          <button class="tab" data-tab="tweak">Tweak</button>
+        </nav>
+        <section class="content">
+          <div class="panel" id="panel"></div>
+        </section>
+      </section>
+    </main>
+    <script>
+      const panels = {
+        preview: ["作品プレビュー", "生成されたHTML/Canvas/Game作品をここに表示します。まずは画面構造の確認用プレビューです。"],
+        code: ["Code", "<pre>// 生成されたHTML/CSS/JavaScriptをここで読む\\nconst gravity = 0.16;\\nconst fuel = 100;\\nfunction updateRocket() {\\n  velocity += gravity;\\n  y += velocity;\\n}</pre>"],
+        runlog: ["Run Log", "<pre>$ create ./labs/sound-reactive-art/index.html\\n$ echo CHELLY_PREVIEW:./labs/sound-reactive-art/index.html</pre>"],
+        explain: ["Explain", "作ったあとで、音・色・動き・数学・コードの関係を分解して説明します。"],
+        tweak: ["Tweak", "色、速度、重力、粒の数、音への反応を安全に変える実験を提案します。"]
+      };
+      const panel = document.querySelector("#panel");
+      function show(tab) {
+        document.querySelectorAll(".tab").forEach((node) => node.classList.toggle("active", node.dataset.tab === tab));
+        const [title, body] = panels[tab];
+        panel.innerHTML = `<h2>${title}</h2><div class="muted">${body}</div><p class="status">Chelly Web Studio preview is running.</p>`;
+      }
+      document.querySelector("#tabs").addEventListener("click", (event) => {
+        const tab = event.target.closest("[data-tab]")?.dataset.tab;
+        if (tab) show(tab);
+      });
+      document.querySelectorAll(".lab,.sample").forEach((node) => node.addEventListener("click", () => show(node.dataset.tab)));
+      document.querySelector("#composer").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const value = document.querySelector("#prompt").value.trim();
+        if (value) {
+          panels.explain = ["Explain", `「${value}」から、まず1つ質問して、選択肢を出し、作品を作る流れにします。`];
+          show("explain");
+        }
+      });
+      show("preview");
+    </script>
+  </body>
+</html>
