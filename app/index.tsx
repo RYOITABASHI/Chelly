@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { View, KeyboardAvoidingView, Platform, useWindowDimensions } from "react-native";
+import { View, Text, KeyboardAvoidingView, Platform, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { useChatStore } from "@/store/chat-store";
 import { useSettingsStore } from "@/store/settings-store";
@@ -121,7 +121,14 @@ export default function ChatScreen() {
 
   // Wait for stores to load
   if (!isSettingsLoaded || !isChatLoaded) {
-    return <View className="flex-1 bg-black" />;
+    return (
+      <View
+        className="flex-1 bg-black items-center justify-center"
+        style={{ flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" }}
+      >
+        <Text style={{ color: "#d4d4d8", fontWeight: "700" }}>Chellyを読み込み中...</Text>
+      </View>
+    );
   }
 
   // Show onboarding if not yet set up

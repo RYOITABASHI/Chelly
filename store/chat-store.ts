@@ -7,6 +7,7 @@
 
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { generateId } from '@/lib/id';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -82,6 +83,22 @@ type ChatStore = {
 
 const STORAGE_KEY = 'chelly_chats';
 
+function getWebItem(key: string): string | null {
+  if (Platform.OS !== 'web') return null;
+  try {
+    return globalThis.localStorage?.getItem(key) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function setWebItem(key: string, value: string): void {
+  if (Platform.OS !== 'web') return;
+  try {
+    globalThis.localStorage?.setItem(key, value);
+  } catch {}
+}
+
 export const useChatStore = create<ChatStore>((set, get) => ({
   sessions: [],
   activeSessionId: null,
@@ -89,7 +106,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   load: async () => {
     try {
-      let raw = await AsyncStorage.getItem(STORAGE_KEY);
+      let raw = Platform.OS === 'web'
+        ? getWebItem(STORAGE_KEY)
+        : await AsyncStorage.getItem(STORAGE_KEY);
       // Strip legacy encryption prefix if present (XOR encryption removed)
       if (raw?.startsWith('ENC:')) raw = null;
       if (raw) {
@@ -128,10 +147,15 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           streamingText: undefined,
         })),
       }));
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({
+      const serialized = JSON.stringify({
         sessions: trimmed,
         activeSessionId,
-      }));
+      });
+      if (Platform.OS === 'web') {
+        setWebItem(STORAGE_KEY, serialized);
+        return;
+      }
+      await AsyncStorage.setItem(STORAGE_KEY, serialized);
     } catch (e) {
       console.warn('[ChatStore] save failed:', e);
     }
