@@ -75,7 +75,8 @@ See [docs/product-strategy.md](docs/product-strategy.md) for the product
 strategy, [docs/platform-strategy.md](docs/platform-strategy.md) for the
 Chromebook and Windows first platform direction, and
 [docs/development-harness.md](docs/development-harness.md) for the development
-checks that keep future work aligned.
+checks that keep future work aligned. Browser-based Gemma experiments are
+tracked in [docs/browser-gemma-research.md](docs/browser-gemma-research.md).
 
 ## Starter Labs
 

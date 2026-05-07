@@ -2,7 +2,7 @@ import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 
-type Provider = "gemini" | "claude" | "groq" | "cerebras" | "perplexity" | "local";
+type Provider = "gemini" | "claude" | "groq" | "cerebras" | "perplexity" | "local" | "browser-gemma";
 
 type SettingsStore = {
   activeProvider: Provider;
@@ -13,6 +13,7 @@ type SettingsStore = {
   perplexityApiKey: string;
   localLlmUrl: string;
   localModel: string;
+  browserGemmaModel: string;
   currentCwd: string;
   autoApproveActions: boolean;
   isOnboarded: boolean;
@@ -30,6 +31,7 @@ const CHELLY_HOME = "/data/data/dev.chelly.app/files/home";
 const DEFAULT_CWD = `${CHELLY_HOME}/chelly/workspace`;
 const DEFAULT_LOCAL_LLM_URL = "http://127.0.0.1:11434";
 const DEFAULT_LOCAL_MODEL = "gemma4:latest";
+const DEFAULT_BROWSER_GEMMA_MODEL = "google/gemma-4-E2B-it";
 const SETTINGS_KEY = "chelly_settings";
 
 function normalizeCwd(cwd: string | undefined): string {
@@ -48,6 +50,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   perplexityApiKey: "",
   localLlmUrl: DEFAULT_LOCAL_LLM_URL,
   localModel: DEFAULT_LOCAL_MODEL,
+  browserGemmaModel: DEFAULT_BROWSER_GEMMA_MODEL,
   currentCwd: DEFAULT_CWD,
   autoApproveActions: false,
   isOnboarded: false,
@@ -66,6 +69,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         activeProvider: data.activeProvider ?? "local",
         localLlmUrl: data.localLlmUrl ?? DEFAULT_LOCAL_LLM_URL,
         localModel: data.localModel ?? DEFAULT_LOCAL_MODEL,
+        browserGemmaModel: data.browserGemmaModel ?? DEFAULT_BROWSER_GEMMA_MODEL,
         currentCwd: normalizeCwd(data.currentCwd),
         autoApproveActions: data.autoApproveActions ?? false,
         isOnboarded: data.isOnboarded ?? false,
@@ -81,6 +85,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       activeProvider: s.activeProvider,
       localLlmUrl: s.localLlmUrl,
       localModel: s.localModel,
+      browserGemmaModel: s.browserGemmaModel,
       currentCwd: s.currentCwd,
       autoApproveActions: s.autoApproveActions,
       isOnboarded: s.isOnboarded,

@@ -22,10 +22,11 @@ import { groqChatStream, type GroqMessage } from "@/lib/groq";
 import { cerebrasChatStream, type CerebrasMessage } from "@/lib/cerebras";
 import { perplexitySearchStream, type PerplexityMessage } from "@/lib/perplexity";
 import { ollamaChatStream, type OllamaMessage } from "@/lib/local-llm";
+import { browserGemmaChat, type BrowserGemmaMessage } from "@/lib/browser-gemma";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type Provider = "gemini" | "claude" | "groq" | "cerebras" | "perplexity" | "local";
+type Provider = "gemini" | "claude" | "groq" | "cerebras" | "perplexity" | "local" | "browser-gemma";
 
 interface ParsedResponse {
   explanation: string;
@@ -41,6 +42,7 @@ interface SettingsSnapshot {
   perplexityApiKey: string;
   localLlmUrl: string;
   localModel: string;
+  browserGemmaModel: string;
   currentCwd: string;
   autoApproveActions: boolean;
 }
@@ -63,6 +65,10 @@ function missingCredentialMessage(settings: SettingsSnapshot): string | null {
       return settings.localLlmUrl
         ? null
         : "Local AIの接続先が未設定です。SettingsでLocal AI URLを設定してください。";
+    case "browser-gemma":
+      return settings.browserGemmaModel
+        ? null
+        : "Browser Gemma modelが未設定です。SettingsでモデルIDを設定してください。";
     default:
       return null;
   }
@@ -185,6 +191,23 @@ async function routeToProvider(
         signal,
       );
       if (!result.success) throw new Error(result.error ?? "Local LLM request failed.");
+      break;
+    }
+
+    case "browser-gemma": {
+      const browserHistory: BrowserGemmaMessage[] = history.map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      }));
+      const result = await browserGemmaChat(
+        settings.browserGemmaModel,
+        systemPrompt,
+        browserHistory,
+        userMessage,
+        (text) => onChunk(text),
+        signal,
+      );
+      if (!result.success) throw new Error(result.error ?? "Browser Gemma request failed.");
       break;
     }
 

@@ -119,6 +119,14 @@ The local AI bridge should own anything the browser cannot reliably own:
 The bridge lets Chelly keep one main UI while adapting local execution for
 Chromebook, Windows, and later macOS.
 
+## Browser Gemma Mode
+
+Gemma-family browser inference through WebGPU or Transformers.js should remain
+a future execution mode for lightweight labs. It can improve zero-install
+privacy and demos, especially on Chromebooks, but it should not replace the
+Local AI Bridge for reliable classroom file operations, safe command execution,
+model management, and larger offline workflows.
+
 ## Decision Rule
 
 When choosing a feature, prefer the option that improves Chromebook and Windows

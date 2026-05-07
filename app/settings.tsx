@@ -4,7 +4,7 @@ import { useRouter, Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettingsStore } from "@/store/settings-store";
 
-type Provider = "gemini" | "claude" | "groq" | "cerebras" | "perplexity" | "local";
+type Provider = "gemini" | "claude" | "groq" | "cerebras" | "perplexity" | "local" | "browser-gemma";
 
 const CLOUD_PROVIDERS: { id: Exclude<Provider, "local">; label: string; keyField: string }[] = [
   { id: "gemini", label: "Gemini", keyField: "geminiApiKey" },
@@ -31,7 +31,10 @@ export default function SettingsScreen() {
     await settings.setApiKey(p.id, value);
   };
 
-  const handleLocalChange = (field: "localLlmUrl" | "localModel", value: string) => {
+  const handleLocalChange = (
+    field: "localLlmUrl" | "localModel" | "browserGemmaModel",
+    value: string,
+  ) => {
     useSettingsStore.setState({ [field]: value } as any);
     settings.save();
   };
@@ -100,6 +103,48 @@ export default function SettingsScreen() {
               value={settings.localModel}
               onChangeText={(v) => handleLocalChange("localModel", v)}
               placeholder="gemma4:latest"
+              placeholderTextColor="#3f3f46"
+              className="text-white text-sm font-mono bg-zinc-800 rounded-lg px-3 py-2 border border-zinc-700/50"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          {/* Browser Gemma */}
+          <Text className="text-zinc-400 text-xs font-mono uppercase tracking-wider mb-3">
+            Experimental Browser AI
+          </Text>
+          <View className="bg-zinc-900 rounded-xl p-4 border border-zinc-800 mb-6">
+            <Pressable
+              onPress={() => settings.setActiveProvider("browser-gemma")}
+              className={`flex-row items-center px-4 py-3 rounded-xl border mb-4 ${
+                settings.activeProvider === "browser-gemma"
+                  ? "border-emerald-500 bg-emerald-600/10"
+                  : "border-zinc-800 bg-zinc-950"
+              }`}
+            >
+              <View
+                className={`w-4 h-4 rounded-full border-2 mr-3 items-center justify-center ${
+                  settings.activeProvider === "browser-gemma" ? "border-emerald-500" : "border-zinc-600"
+                }`}
+              >
+                {settings.activeProvider === "browser-gemma" && (
+                  <View className="w-2 h-2 rounded-full bg-emerald-500" />
+                )}
+              </View>
+              <View className="flex-1">
+                <Text className="text-zinc-100 text-sm font-bold">Browser Gemma WebGPU</Text>
+                <Text className="text-zinc-500 text-xs mt-1">
+                  開発テスト用。対応ブラウザではモデルをブラウザ内で読み込みます。
+                </Text>
+              </View>
+            </Pressable>
+
+            <Text className="text-zinc-400 text-xs font-mono mb-2">Hugging Face model ID</Text>
+            <TextInput
+              value={settings.browserGemmaModel}
+              onChangeText={(v) => handleLocalChange("browserGemmaModel", v)}
+              placeholder="google/gemma-4-E2B-it"
               placeholderTextColor="#3f3f46"
               className="text-white text-sm font-mono bg-zinc-800 rounded-lg px-3 py-2 border border-zinc-700/50"
               autoCapitalize="none"

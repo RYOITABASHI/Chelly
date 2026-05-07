@@ -11,7 +11,7 @@ import { generateId } from '@/lib/id';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type ChatAgent = 'gemini' | 'claude' | 'groq' | 'cerebras' | 'perplexity' | 'local' | 'arena';
+export type ChatAgent = 'gemini' | 'claude' | 'groq' | 'cerebras' | 'perplexity' | 'local' | 'browser-gemma' | 'arena';
 
 export type CommandExecution = {
   command: string;

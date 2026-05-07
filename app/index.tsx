@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { View, KeyboardAvoidingView, Platform } from "react-native";
+import { View, KeyboardAvoidingView, Platform, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { useChatStore } from "@/store/chat-store";
 import { useSettingsStore } from "@/store/settings-store";
@@ -10,9 +10,11 @@ import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatHeader } from "@/components/ChatHeader";
 import { ChatMessageList } from "@/components/ChatMessageList";
 import { CommandInput } from "@/components/CommandInput";
+import { StudioWorkspace } from "@/components/StudioWorkspace";
 
 export default function ChatScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
   const isOnboarded = useSettingsStore((s) => s.isOnboarded);
   const isSettingsLoaded = useSettingsStore((s) => s.isLoaded);
   const isChatLoaded = useChatStore((s) => s.isLoaded);
@@ -125,6 +127,29 @@ export default function ChatScreen() {
   // Show onboarding if not yet set up
   if (!isOnboarded) {
     return <WelcomeScreen />;
+  }
+
+  const useStudioLayout = Platform.OS === "web" && width >= 900;
+
+  if (useStudioLayout) {
+    return (
+      <View className="flex-1 bg-black">
+        <ChatHeader
+          onClearChat={handleClearChat}
+          onBackToLabs={handleBackToLabs}
+          showBackToLabs={(session?.messages.length ?? 0) > 0}
+        />
+        <StudioWorkspace
+          messages={session?.messages ?? []}
+          isStreaming={isStreaming}
+          onSend={handleSend}
+          onCancel={cancel}
+          onOpenSample={handleOpenSample}
+          onApprove={handleApprove}
+          onReject={handleReject}
+        />
+      </View>
+    );
   }
 
   const RootView = Platform.OS === "ios" ? KeyboardAvoidingView : View;

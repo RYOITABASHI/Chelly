@@ -10,6 +10,7 @@ const AGENT_COLORS: Record<string, string> = {
   cerebras: "text-violet-400",
   perplexity: "text-teal-400",
   local: "text-purple-400",
+  "browser-gemma": "text-emerald-400",
 };
 
 type Props = {
