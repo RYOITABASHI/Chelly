@@ -72,7 +72,10 @@ and education partners can evaluate and deploy:
 - clear security and privacy model
 
 See [docs/product-strategy.md](docs/product-strategy.md) for the product
-strategy.
+strategy, [docs/platform-strategy.md](docs/platform-strategy.md) for the
+Chromebook and Windows first platform direction, and
+[docs/development-harness.md](docs/development-harness.md) for the development
+checks that keep future work aligned.
 
 ## Starter Labs
 
@@ -139,7 +142,11 @@ modification.
 
 ## Current App
 
-Chelly is currently an Expo + React Native Android app with:
+Chelly is currently an Expo + React Native app that started from the Android
+prototype. The product direction is now Web/PWA first for Chromebook and
+Windows, with Android kept as the current shell and fallback.
+
+The app currently includes:
 
 - chat-first UI
 - local Gemma-family AI as the default provider
@@ -149,6 +156,21 @@ Chelly is currently an Expo + React Native Android app with:
 - app-private execution bridge for local project files
 - starter STEAM prompts
 - settings for API keys and local model URLs
+
+## Platform Direction
+
+Chelly should be developed first as a Chromebook and Windows Web/PWA studio.
+
+The primary experience should be a large-screen creation workspace:
+
+```text
+Chat / Preview / Code / Run Log / Explain / Tweak
+```
+
+Android remains useful as a prototype shell and ChromeOS fallback, but it
+should not define the main product shape. Local model inference, project file
+writes, and safe command execution should move behind a Local AI Bridge that a
+Web/PWA frontend can use across Chromebook, Windows, and later macOS.
 
 ## Runtime Direction
 
@@ -188,7 +210,19 @@ See [SECURITY.md](SECURITY.md) for the detailed model.
 
 ## Roadmap
 
-### Android MVP
+### Web/PWA Studio MVP
+
+- Chromebook and Windows browser/PWA as the primary target
+- large-screen studio layout instead of phone-first chat
+- Starter Lab cards on the empty studio screen
+- Preview / Code / Run Log / Explain / Tweak surfaces
+- local AI as the default path, cloud providers as optional upgrades
+- STEAM-focused system prompt
+- generate small self-contained projects
+- explain code and science after generation
+- development harness for Chromebook and Windows first decisions
+
+### Android Prototype
 
 - Starter Lab cards on the empty chat screen
 - STEAM-focused system prompt
@@ -198,7 +232,10 @@ See [SECURITY.md](SECURITY.md) for the detailed model.
 
 ### Next
 
-- Web preview for generated projects
+- split shared product core from platform shell
+- add Web/PWA studio entry point
+- design Local AI Bridge contract
+- web preview for generated projects
 - age-level selector: Kids, Junior, Teen
 - teacher mode for 45-minute lesson plans
 - project gallery
