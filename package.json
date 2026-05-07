@@ -9,7 +9,7 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "build:web": "expo export --platform web --output-dir dist-web",
-    "build:web:pages": "EXPO_BASE_URL=/Chelly/ expo export --platform web --output-dir dist-web",
+    "build:web:pages": "cross-env EXPO_BASE_URL=/Chelly/ expo export --platform web --output-dir dist-web",
     "deploy:pages": "pnpm build:web:pages && node scripts/deploy-pages.mjs"
   },
   "dependencies": {
@@ -39,6 +39,7 @@
   "devDependencies": {
     "@types/react": "~19.1.0",
     "babel-preset-expo": "^54.0.10",
+    "cross-env": "^10.1.0",
     "typescript": "~5.9.2"
   },
   "private": true
