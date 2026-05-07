@@ -6,4 +6,5 @@ modules/*/android/build/
 ios/
 *.apk
 dist/
+dist-web/
 .env

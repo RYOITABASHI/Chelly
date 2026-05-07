@@ -9,6 +9,13 @@ const config: ExpoConfig = {
   scheme: "chelly",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  experiments: {
+    baseUrl: process.env.EXPO_BASE_URL ?? "/",
+  },
+  web: {
+    bundler: "metro",
+    output: "static",
+  },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
