@@ -12,7 +12,11 @@ if (!existsSync(distDir)) {
 }
 
 rmSync(worktreeDir, { recursive: true, force: true });
-execFileSync("git", ["clone", "--depth", "1", "--branch", "gh-pages", "https://github.com/RYOITABASHI/Chelly.git", worktreeDir], {
+execFileSync("git", [
+  "-c", "core.longpaths=true",
+  "clone", "--depth", "1", "--branch", "gh-pages",
+  "https://github.com/RYOITABASHI/Chelly.git", worktreeDir,
+], {
   stdio: "inherit",
 });
 
