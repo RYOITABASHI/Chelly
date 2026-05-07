@@ -257,9 +257,19 @@ See [SECURITY.md](SECURITY.md) for the detailed model.
 git clone https://github.com/RYOITABASHI/Chelly.git
 cd Chelly
 pnpm install
+
+# PC (browser, primary surface) — also reachable from a phone on the same Wi-Fi
+pnpm exec expo start --web --host lan
+# → http://localhost:8081/  (PC)
+# → http://<your-LAN-IP>:8081/  (mobile browser)
+
+# Android APK (full native modules incl. exec-bridge / voice-input)
 npx expo prebuild --platform android
 cd android && ./gradlew :app:assembleDebug
 ```
+
+See [docs/testing.md](docs/testing.md) for the full PC + mobile test workflow,
+firewall notes, and a surface-vs-feature matrix.
 
 ## Tech Stack
 
