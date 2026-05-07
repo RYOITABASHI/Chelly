@@ -6,13 +6,12 @@ import { useSettingsStore } from "@/store/settings-store";
 
 type Provider = "gemini" | "claude" | "groq" | "cerebras" | "perplexity" | "local";
 
-const PROVIDERS: { id: Provider; label: string; keyField: string }[] = [
+const CLOUD_PROVIDERS: { id: Exclude<Provider, "local">; label: string; keyField: string }[] = [
   { id: "gemini", label: "Gemini", keyField: "geminiApiKey" },
   { id: "claude", label: "Claude", keyField: "claudeApiKey" },
   { id: "groq", label: "Groq", keyField: "groqApiKey" },
   { id: "cerebras", label: "Cerebras", keyField: "cerebrasApiKey" },
   { id: "perplexity", label: "Perplexity", keyField: "perplexityApiKey" },
-  { id: "local", label: "Local LLM", keyField: "localLlmUrl" },
 ];
 
 export default function SettingsScreen() {
@@ -24,18 +23,17 @@ export default function SettingsScreen() {
   const toggleShowKey = (id: string) =>
     setShowKeys((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  const getKeyValue = (p: (typeof PROVIDERS)[number]): string => {
-    if (p.id === "local") return settings.localLlmUrl;
+  const getKeyValue = (p: (typeof CLOUD_PROVIDERS)[number]): string => {
     return (settings as any)[p.keyField] ?? "";
   };
 
-  const handleKeyChange = async (p: (typeof PROVIDERS)[number], value: string) => {
-    if (p.id === "local") {
-      useSettingsStore.setState({ localLlmUrl: value });
-      settings.save();
-    } else {
-      await settings.setApiKey(p.id, value);
-    }
+  const handleKeyChange = async (p: (typeof CLOUD_PROVIDERS)[number], value: string) => {
+    await settings.setApiKey(p.id, value);
+  };
+
+  const handleLocalChange = (field: "localLlmUrl" | "localModel", value: string) => {
+    useSettingsStore.setState({ [field]: value } as any);
+    settings.save();
   };
 
   return (
@@ -56,61 +54,95 @@ export default function SettingsScreen() {
             <View className="w-16" />
           </View>
 
-          {/* Provider selector */}
+          {/* Local AI */}
           <Text className="text-zinc-400 text-xs font-mono uppercase tracking-wider mb-3">
-            AI Provider
+            Local AI
           </Text>
-          <View className="gap-2 mb-6">
-            {PROVIDERS.map((p) => (
-              <Pressable
-                key={p.id}
-                onPress={() => settings.setActiveProvider(p.id)}
-                className={`flex-row items-center px-4 py-3 rounded-xl border ${
-                  settings.activeProvider === p.id
-                    ? "border-indigo-500 bg-indigo-600/10"
-                    : "border-zinc-800 bg-zinc-900"
+          <View className="bg-zinc-900 rounded-xl p-4 border border-zinc-800 mb-6">
+            <Pressable
+              onPress={() => settings.setActiveProvider("local")}
+              className={`flex-row items-center px-4 py-3 rounded-xl border mb-4 ${
+                settings.activeProvider === "local"
+                  ? "border-emerald-500 bg-emerald-600/10"
+                  : "border-zinc-800 bg-zinc-950"
+              }`}
+            >
+              <View
+                className={`w-4 h-4 rounded-full border-2 mr-3 items-center justify-center ${
+                  settings.activeProvider === "local" ? "border-emerald-500" : "border-zinc-600"
                 }`}
               >
-                <View
-                  className={`w-4 h-4 rounded-full border-2 mr-3 items-center justify-center ${
-                    settings.activeProvider === p.id
-                      ? "border-indigo-500"
-                      : "border-zinc-600"
-                  }`}
-                >
-                  {settings.activeProvider === p.id && (
-                    <View className="w-2 h-2 rounded-full bg-indigo-500" />
-                  )}
-                </View>
-                <Text className="text-zinc-200 text-sm flex-1">{p.label}</Text>
-              </Pressable>
-            ))}
+                {settings.activeProvider === "local" && (
+                  <View className="w-2 h-2 rounded-full bg-emerald-500" />
+                )}
+              </View>
+              <View className="flex-1">
+                <Text className="text-zinc-100 text-sm font-bold">Bundled Gemma local</Text>
+                <Text className="text-zinc-500 text-xs mt-1">
+                  端末内のAIを優先して、APIキーなしで始めます。
+                </Text>
+              </View>
+            </Pressable>
+
+            <Text className="text-zinc-400 text-xs font-mono mb-2">Local AI URL</Text>
+            <TextInput
+              value={settings.localLlmUrl}
+              onChangeText={(v) => handleLocalChange("localLlmUrl", v)}
+              placeholder="http://127.0.0.1:11434"
+              placeholderTextColor="#3f3f46"
+              className="text-white text-sm font-mono bg-zinc-800 rounded-lg px-3 py-2 border border-zinc-700/50 mb-3"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            <Text className="text-zinc-400 text-xs font-mono mb-2">Model</Text>
+            <TextInput
+              value={settings.localModel}
+              onChangeText={(v) => handleLocalChange("localModel", v)}
+              placeholder="gemma4:latest"
+              placeholderTextColor="#3f3f46"
+              className="text-white text-sm font-mono bg-zinc-800 rounded-lg px-3 py-2 border border-zinc-700/50"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
           </View>
 
-          {/* API key fields */}
+          {/* Cloud providers */}
           <Text className="text-zinc-400 text-xs font-mono uppercase tracking-wider mb-3">
-            API Keys
+            Optional Cloud AI
           </Text>
           <View className="gap-3 mb-6">
-            {PROVIDERS.map((p) => (
+            {CLOUD_PROVIDERS.map((p) => (
               <View key={p.id} className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
                 <View className="flex-row items-center justify-between mb-2">
-                  <Text className="text-zinc-400 text-xs font-mono">{p.label}</Text>
-                  {p.id !== "local" && (
-                    <Pressable onPress={() => toggleShowKey(p.id)}>
-                      <Text className="text-zinc-500 text-xs">
-                        {showKeys[p.id] ? "Hide" : "Show"}
-                      </Text>
-                    </Pressable>
-                  )}
+                  <Pressable
+                    onPress={() => settings.setActiveProvider(p.id)}
+                    className="flex-row items-center flex-1"
+                  >
+                    <View
+                      className={`w-4 h-4 rounded-full border-2 mr-3 items-center justify-center ${
+                        settings.activeProvider === p.id ? "border-indigo-500" : "border-zinc-600"
+                      }`}
+                    >
+                      {settings.activeProvider === p.id && (
+                        <View className="w-2 h-2 rounded-full bg-indigo-500" />
+                      )}
+                    </View>
+                    <Text className="text-zinc-400 text-xs font-mono">{p.label}</Text>
+                  </Pressable>
+                  <Pressable onPress={() => toggleShowKey(p.id)}>
+                    <Text className="text-zinc-500 text-xs">
+                      {showKeys[p.id] ? "Hide" : "Show"}
+                    </Text>
+                  </Pressable>
                 </View>
                 <TextInput
                   value={getKeyValue(p)}
                   onChangeText={(v) => handleKeyChange(p, v)}
-                  placeholder={p.id === "local" ? "http://localhost:11434" : "API key..."}
+                  placeholder="API key..."
                   placeholderTextColor="#3f3f46"
                   className="text-white text-sm font-mono bg-zinc-800 rounded-lg px-3 py-2 border border-zinc-700/50"
-                  secureTextEntry={p.id !== "local" && !showKeys[p.id]}
+                  secureTextEntry={!showKeys[p.id]}
                   autoCapitalize="none"
                   autoCorrect={false}
                 />

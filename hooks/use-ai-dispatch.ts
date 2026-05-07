@@ -40,6 +40,7 @@ interface SettingsSnapshot {
   cerebrasApiKey: string;
   perplexityApiKey: string;
   localLlmUrl: string;
+  localModel: string;
   currentCwd: string;
   autoApproveActions: boolean;
 }
@@ -59,7 +60,9 @@ function missingCredentialMessage(settings: SettingsSnapshot): string | null {
     case "perplexity":
       return settings.perplexityApiKey ? null : "Perplexity APIキーが未設定です。SettingsでAPIキーを設定してください。";
     case "local":
-      return settings.localLlmUrl ? null : "Local LLM URLが未設定です。SettingsでローカルLLMのURLを設定してください。";
+      return settings.localLlmUrl
+        ? null
+        : "Local AIの接続先が未設定です。SettingsでLocal AI URLを設定してください。";
     default:
       return null;
   }
@@ -175,7 +178,7 @@ async function routeToProvider(
       ];
       const result = await ollamaChatStream(
         settings.localLlmUrl,
-        "default",
+        settings.localModel || "gemma4:latest",
         systemPrompt,
         localHistory,
         (text) => onChunk(text),

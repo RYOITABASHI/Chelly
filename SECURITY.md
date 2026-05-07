@@ -6,6 +6,9 @@ conservative.
 
 ## Default Safety Model
 
+- **Local AI first**: the default product direction is to run a bundled or
+  locally managed Gemma-family model so classroom prompts and student projects
+  do not need to leave the device for the first experience.
 - **No Termux requirement**: normal projects live in Chelly's app-private
   sandbox under `/data/data/dev.chelly.app/files/home/chelly`.
 - **Approval-first execution**: AI-proposed local actions are displayed as
@@ -33,9 +36,9 @@ app. Chelly should still be used with real supervision in classrooms.
 
 ## API Keys
 
-API keys configured in Settings are stored through `expo-secure-store`.
-Chelly does not operate a backend proxy for those keys. Requests go directly to
-the provider selected by the user.
+Cloud provider API keys are optional. When configured in Settings, they are
+stored through `expo-secure-store`. Chelly does not operate a backend proxy for
+those keys. Requests go directly to the provider selected by the user.
 
 ## Reporting
 

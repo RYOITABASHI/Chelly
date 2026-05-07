@@ -39,22 +39,27 @@ export function ChatMessageList({
 
   if (messages.length === 0) {
     return (
-      <View className="flex-1 justify-center px-6">
-        <Text className="text-white text-2xl text-center font-bold mb-2">
-          何を作ってみる？
-        </Text>
-        <Text className="text-zinc-500 text-sm text-center mb-8">
-          まず動くものを作って、あとから仕組みを学ぼう。
-        </Text>
+      <View className="flex-1 px-5 py-6">
+        <View className="mb-5 rounded-2xl bg-zinc-950 border border-zinc-800 p-5">
+          <Text className="text-emerald-300 text-xs font-mono uppercase tracking-widest mb-3">
+            Create first, learn after
+          </Text>
+          <Text className="text-white text-2xl font-bold mb-2">
+            何を作って、どう動かしてみる？
+          </Text>
+          <Text className="text-zinc-500 text-sm leading-6">
+            Chellyは作品、コード、実行ログ、しくみの説明を1つの制作スタジオで扱います。
+          </Text>
+        </View>
 
         <View className="gap-3">
           <Pressable
             onPress={onOpenSample}
-            className="bg-emerald-600 rounded-2xl p-4 active:opacity-70"
+            className="bg-emerald-500 rounded-2xl p-4 active:opacity-70"
           >
-            <Text className="text-white font-bold text-base">🎛️ サンプルアートを開く</Text>
-            <Text className="text-emerald-100/80 text-xs mt-1">
-              API応答なしで、音に反応する光のアートをテストします。
+            <Text className="text-black font-bold text-base">サンプルアートを開く</Text>
+            <Text className="text-emerald-950 text-xs mt-1">
+              AI応答を待たずに、作品・コード・しくみタブを確認します。
             </Text>
           </Pressable>
 
@@ -62,7 +67,7 @@ export function ChatMessageList({
             <Pressable
               key={starter.title}
               onPress={() => onStarterPress?.(starter.prompt)}
-              className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 active:opacity-70"
+              className="bg-zinc-950 rounded-2xl p-4 border border-zinc-800 active:opacity-70"
             >
               <View className="flex-row items-center gap-3 mb-2">
                 <Text className="text-2xl">{starter.icon}</Text>

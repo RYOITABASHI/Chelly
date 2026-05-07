@@ -46,8 +46,10 @@ first, code and explanation second.
   generative art are core subjects, not side demos.
 - **Tweak to learn** — students change values, rules, and behavior to see what
   happens.
+- **Local AI first** — Chelly should start from an included or locally managed
+  Gemma-family model, with cloud providers as optional upgrades.
 - **No Termux requirement** — Chelly should run from the app sandbox. The goal
-  is install, paste an API key, and start creating.
+  is install, open, and start creating.
 - **Safe by default** — destructive operations require explicit confirmation.
 - **Advanced escape hatch** — motivated learners can enable auto-run in
   Settings, but destructive and blocked actions still stay blocked.
@@ -140,8 +142,9 @@ modification.
 Chelly is currently an Expo + React Native Android app with:
 
 - chat-first UI
-- Gemini as the default provider
-- optional Claude, Groq, Cerebras, Perplexity, and local LLM providers
+- local Gemma-family AI as the default provider
+- Gemini, Claude, Groq, Cerebras, Perplexity, and local server providers as
+  optional advanced choices
 - command safety classification
 - app-private execution bridge for local project files
 - starter STEAM prompts
@@ -161,9 +164,9 @@ runtime files under Chelly's own Android app sandbox:
 That keeps onboarding closer to:
 
 1. install Chelly
-2. paste a Gemini API key
-3. choose a starter lab
-4. make, play, explain, tweak
+2. choose a starter lab
+3. make, play, explain, tweak
+4. optionally connect a cloud model for heavier generation
 
 Advanced runtimes such as Python, Node.js, Raspberry Pi bridges, or Arduino
 tooling can be added later as optional adapters. They should not be required

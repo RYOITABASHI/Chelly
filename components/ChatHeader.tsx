@@ -14,7 +14,7 @@ export function ChatHeader({ onClearChat, onBackToLabs, showBackToLabs }: Props)
 
   return (
     <View
-      className="bg-zinc-900 border-b border-zinc-800 px-4 pb-3 flex-row items-center justify-between"
+      className="bg-zinc-950 border-b border-zinc-800 px-4 pb-3 flex-row items-center justify-between"
       style={{ paddingTop: insets.top + 8 }}
     >
       <View className="flex-row items-center gap-3">
@@ -29,10 +29,10 @@ export function ChatHeader({ onClearChat, onBackToLabs, showBackToLabs }: Props)
         ) : null}
         <View>
           <Text className="text-white text-lg font-bold font-mono tracking-wider">
-            Chelly
+            Chelly Studio
           </Text>
           <Text className="text-zinc-500 text-[10px] uppercase tracking-widest">
-            AI STEAM Lab
+            Local AI STEAM Workspace
           </Text>
         </View>
       </View>

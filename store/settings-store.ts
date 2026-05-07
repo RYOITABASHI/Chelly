@@ -12,6 +12,7 @@ type SettingsStore = {
   cerebrasApiKey: string;
   perplexityApiKey: string;
   localLlmUrl: string;
+  localModel: string;
   currentCwd: string;
   autoApproveActions: boolean;
   isOnboarded: boolean;
@@ -27,6 +28,8 @@ type SettingsStore = {
 
 const CHELLY_HOME = "/data/data/dev.chelly.app/files/home";
 const DEFAULT_CWD = `${CHELLY_HOME}/chelly/workspace`;
+const DEFAULT_LOCAL_LLM_URL = "http://127.0.0.1:11434";
+const DEFAULT_LOCAL_MODEL = "gemma4:latest";
 const SETTINGS_KEY = "chelly_settings";
 
 function normalizeCwd(cwd: string | undefined): string {
@@ -37,13 +40,14 @@ function normalizeCwd(cwd: string | undefined): string {
 }
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
-  activeProvider: "gemini",
+  activeProvider: "local",
   geminiApiKey: "",
   claudeApiKey: "",
   groqApiKey: "",
   cerebrasApiKey: "",
   perplexityApiKey: "",
-  localLlmUrl: "",
+  localLlmUrl: DEFAULT_LOCAL_LLM_URL,
+  localModel: DEFAULT_LOCAL_MODEL,
   currentCwd: DEFAULT_CWD,
   autoApproveActions: false,
   isOnboarded: false,
@@ -59,8 +63,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       const cerebrasApiKey = await SecureStore.getItemAsync("chelly_cerebras_key") ?? "";
       const perplexityApiKey = await SecureStore.getItemAsync("chelly_perplexity_key") ?? "";
       set({
-        activeProvider: data.activeProvider ?? "gemini",
-        localLlmUrl: data.localLlmUrl ?? "",
+        activeProvider: data.activeProvider ?? "local",
+        localLlmUrl: data.localLlmUrl ?? DEFAULT_LOCAL_LLM_URL,
+        localModel: data.localModel ?? DEFAULT_LOCAL_MODEL,
         currentCwd: normalizeCwd(data.currentCwd),
         autoApproveActions: data.autoApproveActions ?? false,
         isOnboarded: data.isOnboarded ?? false,
@@ -75,6 +80,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({
       activeProvider: s.activeProvider,
       localLlmUrl: s.localLlmUrl,
+      localModel: s.localModel,
       currentCwd: s.currentCwd,
       autoApproveActions: s.autoApproveActions,
       isOnboarded: s.isOnboarded,
