@@ -29,9 +29,9 @@ export default function FilePreview({ filePath, visible, onClose }: FilePreviewP
     let cancelled = false;
     setLoading(true);
     execCommand(`cat ${JSON.stringify(filePath)}`)
-      .then((result: string) => {
+      .then((result) => {
         if (!cancelled) {
-          setContent(result);
+          setContent(result.stdout);
           setLoading(false);
         }
       })

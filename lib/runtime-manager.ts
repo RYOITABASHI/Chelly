@@ -38,7 +38,9 @@ const RUNTIMES: Record<Runtime, RuntimeInfo> = {
   },
 };
 
-const RUNTIME_DIR = "/data/data/com.termux/files/home/chelly/runtimes";
+const CHELLY_HOME = "/data/data/dev.chelly.app/files/home";
+const RUNTIME_DIR = `${CHELLY_HOME}/chelly/runtimes`;
+const CHELLY_BIN_DIR = `${CHELLY_HOME}/chelly/bin`;
 
 export function detectMissingRuntime(stderr: string, exitCode: number): Runtime | null {
   if (exitCode !== 127) return null;
@@ -68,7 +70,7 @@ export async function installRuntime(
   onProgress?.(`${info.displayName}をダウンロード中...`);
 
   // Create runtime directory
-  await execCommand(`mkdir -p ${RUNTIME_DIR}`, undefined, 5000);
+  await execCommand(`mkdir -p ${RUNTIME_DIR} ${CHELLY_BIN_DIR}`, undefined, 5000);
 
   // Download
   const dlResult = await execCommand(
@@ -98,7 +100,7 @@ export async function installRuntime(
 
   // Add to PATH (symlink to a directory that's on PATH)
   await execCommand(
-    `ln -sf ${RUNTIME_DIR}/bin/${info.binName} /data/data/com.termux/files/home/chelly/bin/${info.binName}`,
+    `ln -sf ${RUNTIME_DIR}/bin/${info.binName} ${CHELLY_BIN_DIR}/${info.binName}`,
     undefined,
     5000
   );

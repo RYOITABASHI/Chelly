@@ -1,39 +1,22 @@
-import { useState } from "react";
-import { View, Text, TextInput, Pressable, Linking, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettingsStore } from "@/store/settings-store";
-
-const AI_STUDIO_URL = "https://aistudio.google.com/apikey";
+import { STEAM_STARTERS } from "@/lib/steam-prompts";
 
 const FEATURES = [
-  { icon: "\uD83D\uDCAC", text: "自然言語でファイル操作やコマンド実行" },
-  { icon: "\uD83D\uDD12", text: "危険なコマンドは自動で警告・ブロック" },
-  { icon: "\u26A1", text: "Gemini, Claude, Groqなど複数AIに対応" },
+  { icon: "AI", text: "ローカルAIで、APIキーなしに制作を始める" },
+  { icon: "▶", text: "作品をプレビューしながら、会話で改造する" },
+  { icon: "{ }", text: "コード、実行ログ、理科・数学・表現の仕組みも学ぶ" },
 ];
 
 export function WelcomeScreen() {
-  const [apiKey, setApiKey] = useState("");
-  const [error, setError] = useState("");
   const setOnboarded = useSettingsStore((s) => s.setOnboarded);
-  const setApiKeyStore = useSettingsStore((s) => s.setApiKey);
+  const setActiveProvider = useSettingsStore((s) => s.setActiveProvider);
   const insets = useSafeAreaInsets();
 
-  const handleStart = async () => {
-    const trimmed = apiKey.trim();
-    if (!trimmed) {
-      setError("APIキーを入力してください");
-      return;
-    }
-    if (trimmed.length < 20) {
-      setError("APIキーが短すぎます");
-      return;
-    }
-    try {
-      await setApiKeyStore("gemini", trimmed);
-      setOnboarded();
-    } catch (e) {
-      setError("保存に失敗しました");
-    }
+  const handleStart = () => {
+    setActiveProvider("local");
+    setOnboarded();
   };
 
   return (
@@ -43,71 +26,80 @@ export function WelcomeScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <View
-        className="flex-1 justify-center px-8"
+        className="flex-1 px-6"
         style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}
       >
         {/* Title */}
-        <Text className="text-white text-4xl font-bold text-center font-mono mb-2">
-          Chelly
-        </Text>
-        <Text className="text-zinc-400 text-center text-sm mb-10">
-          自然言語でなんでもできる
-        </Text>
+        <View className="pt-8 pb-6">
+          <Text className="text-emerald-300 text-xs font-mono uppercase tracking-widest mb-3">
+            Local AI STEAM Studio
+          </Text>
+          <Text className="text-white text-4xl font-bold font-mono mb-3">
+            Chelly
+          </Text>
+          <Text className="text-zinc-300 text-lg font-semibold leading-7">
+            作る、動かす、コードを読む。授業でそのまま使える制作スタジオ。
+          </Text>
+          <Text className="text-zinc-500 text-sm mt-3 leading-6">
+            まず端末内のAIで始めます。クラウドAPIキーはあとから必要な場合だけ追加できます。
+          </Text>
+        </View>
 
         {/* Features */}
-        <View className="gap-4 mb-10">
+        <View className="gap-3 mb-7">
           {FEATURES.map((f, i) => (
-            <View key={i} className="flex-row items-center gap-3">
-              <Text className="text-2xl">{f.icon}</Text>
-              <Text className="text-zinc-300 text-sm flex-1">{f.text}</Text>
+            <View key={i} className="flex-row items-center gap-3 rounded-xl bg-zinc-950 border border-zinc-800 px-4 py-3">
+              <View className="w-9 h-9 rounded-lg bg-zinc-800 items-center justify-center">
+                <Text className="text-emerald-300 text-xs font-bold font-mono">{f.icon}</Text>
+              </View>
+              <Text className="text-zinc-300 text-sm flex-1 leading-5">{f.text}</Text>
             </View>
           ))}
         </View>
 
-        {/* API Key section */}
-        <View className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
-          <Text className="text-zinc-300 text-sm mb-3">
-            始めるには、Gemini APIキー（無料）が必要です
+        <View className="mb-7">
+          <Text className="text-zinc-400 text-xs uppercase tracking-widest mb-3">
+            Starter Labs
           </Text>
+          <View className="gap-3">
+            {STEAM_STARTERS.map((starter) => (
+              <View
+                key={starter.title}
+                className="bg-zinc-900/70 rounded-2xl p-4 border border-zinc-800"
+              >
+                <View className="flex-row items-center gap-3 mb-1">
+                  <Text className="text-2xl">{starter.icon}</Text>
+                  <Text className="text-white font-bold flex-1">{starter.title}</Text>
+                  <Text className="text-zinc-500 text-xs">{starter.ageBand}</Text>
+                </View>
+                <Text className="text-zinc-500 text-xs ml-9">{starter.learn}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
 
-          <Pressable
-            onPress={() => Linking.openURL(AI_STUDIO_URL)}
-            className="mb-4 active:opacity-60"
-          >
-            <Text className="text-indigo-400 text-sm underline">
-              AI Studioでキーを取得 {"\u2197"}
-            </Text>
-          </Pressable>
-
-          <TextInput
-            value={apiKey}
-            onChangeText={(t) => {
-              setApiKey(t);
-              setError("");
-            }}
-            placeholder="APIキーを貼り付け..."
-            placeholderTextColor="#52525b"
-            className="bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm border border-zinc-700/50 mb-3 font-mono"
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          {error ? (
-            <Text className="text-red-400 text-xs mb-2">{error}</Text>
-          ) : null}
-
+        {/* Start */}
+        <View className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
+          <View className="flex-row items-center justify-between mb-4">
+            <View>
+              <Text className="text-zinc-100 font-bold">Local Gemma mode</Text>
+              <Text className="text-zinc-500 text-xs mt-1">APIキーなし・端末内AIを優先</Text>
+            </View>
+            <View className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-700">
+              <Text className="text-emerald-300 text-xs font-bold">Default</Text>
+            </View>
+          </View>
           <Pressable
             onPress={handleStart}
-            className="bg-indigo-600 rounded-xl py-3 items-center active:opacity-80"
+            className="bg-emerald-500 rounded-xl py-3 items-center active:opacity-80"
           >
-            <Text className="text-white font-bold text-base">始める</Text>
+            <Text className="text-black font-bold text-base">制作スタジオを開く</Text>
           </Pressable>
         </View>
 
         {/* Skip note */}
         <Text className="text-zinc-600 text-xs text-center mt-6">
-          他のプロバイダーは設定画面で追加できます
+          クラウドAIやモデル接続先はSettingsから変更できます
         </Text>
       </View>
     </ScrollView>

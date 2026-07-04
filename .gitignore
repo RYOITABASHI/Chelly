@@ -2,7 +2,9 @@ node_modules/
 .expo/
 android/
 !modules/*/android/
+modules/*/android/build/
 ios/
 *.apk
 dist/
+dist-web/
 .env

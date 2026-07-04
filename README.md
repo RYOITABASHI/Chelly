@@ -1,56 +1,285 @@
 # Chelly
 
-自然言語でなんでもできるAndroidアプリ
+AI STEAM creation studio for kids, teens, teachers, artists, and
+non-engineers.
 
 [![Build](https://github.com/RYOITABASHI/Chelly/actions/workflows/build-android.yml/badge.svg)](https://github.com/RYOITABASHI/Chelly/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## What is Chelly?
 
-Chelly turns natural language into action on your Android device.
+Chelly helps students start with what they want to make, not with syntax,
+setup, or a blank editor.
 
-- **Natural language in, results out** — type what you want, Chelly executes invisible commands and shows you the result in chat
-- **No terminal, no shell, no technical knowledge needed** — just talk to it
-- **Powered by Gemini (free)** with support for Claude, Groq, Cerebras, Perplexity, and local LLMs
-- **Built with Expo + React Native**
+Describe an idea in natural language. Chelly creates a small project,
+experiment, simulation, digital artwork, sound piece, game, or visual
+explanation. Then it explains the code, science, math, music, and design behind
+it step by step.
 
-## Features
+```text
+I want to make a rocket landing game.
+↓
+Chelly builds a small playable project.
+↓
+The student plays with it.
+↓
+Chelly explains gravity, velocity, fuel, and collision.
+↓
+The student changes values and learns by modifying the thing they wanted.
+```
 
-- **Chat-based interface** — conversational UX, no command line
-- **Multiple LLM providers** — Gemini (default, free tier), Claude, Groq, Cerebras, Perplexity, local LLMs
-- **Arena mode** — compare responses from different LLMs side by side
-- **GitHub Actions wizard** — set up CI/CD through conversation
-- **Voice input** — speak instead of type
-- **File browser** — browse and manage files visually
-- **Runtime auto-install** — Python, Node, Git installed on demand
-- **Command safety** — destructive commands require explicit confirmation
+Chelly is inspired by the original direction behind
+[Shelly](https://github.com/RYOITABASHI/Shelly). Shelly became the native
+Android AI terminal IDE needed to make serious CLI work possible on Android.
+Chelly brings that idea back to the surface for STEAM education: creation
+first, code and explanation second.
+
+## Product Principles
+
+- **Natural language first** — students describe what they want to build.
+- **Guided choices** — Chelly asks one useful question and gives concrete
+  options instead of silently deciding everything.
+- **Make before teaching** — show a working thing before explaining syntax.
+- **Explain after** — reveal code, science, and math only after there is
+  something to care about.
+- **Art is first-class** — music, sound, motion, color, visual systems, and
+  generative art are core subjects, not side demos.
+- **Tweak to learn** — students change values, rules, and behavior to see what
+  happens.
+- **Local AI first** — Chelly should start from an included or locally managed
+  Gemma-family model, with cloud providers as optional upgrades.
+- **No Termux requirement** — Chelly should run from the app sandbox. The goal
+  is install, open, and start creating.
+- **Safe by default** — destructive operations require explicit confirmation.
+- **Advanced escape hatch** — motivated learners can enable auto-run in
+  Settings, but destructive and blocked actions still stay blocked.
+
+## Education Package Direction
+
+Chelly is being developed toward an education-ready package, not just a
+consumer chatbot.
+
+The long-term target is a platform that schools, coding programs, maker spaces,
+and education partners can evaluate and deploy:
+
+- safe default mode for classrooms
+- teacher/guardian friendly onboarding
+- no external Termux setup for normal use
+- guided student choices instead of blind AI generation
+- age-level explanations
+- repeatable starter labs
+- exportable learning artifacts
+- clear security and privacy model
+
+See [docs/product-strategy.md](docs/product-strategy.md) for the product
+strategy, [docs/platform-strategy.md](docs/platform-strategy.md) for the
+Chromebook and Windows first platform direction, and
+[docs/development-harness.md](docs/development-harness.md) for the development
+checks that keep future work aligned. Browser-based Gemma experiments are
+tracked in [docs/browser-gemma-research.md](docs/browser-gemma-research.md).
+
+## Starter Labs
+
+The first Chelly experience is built around small labs:
+
+| Lab | What students make | What they learn |
+| --- | --- | --- |
+| Sound Reactive Art Lab | A visual artwork that reacts to sound | sound, color, frequency, motion, generative art |
+| Generative Pattern Lab | A living pattern system | repetition, randomness, rhythm, composition |
+| Rocket Landing Lab | A 2D moon landing game | gravity, velocity, fuel, collision, conditions |
+| Sound Lab | A sound visualizer | waveform, volume, frequency, graphs |
+| Jump Game Lab | A character jump game | position, velocity, gravity, game loops |
+
+These are intentionally small. Chelly should make the first working version
+quickly, then guide the student through changes.
+
+## Guided Creation UX
+
+Chelly should feel closer to a creative coach than a blank chatbot.
+
+For broad ideas, Chelly first asks a single question with concrete choices:
+
+```text
+What kind of rocket landing game do you want?
+
+1. Easy moon landing (recommended) — simple gravity and fuel.
+2. Hard mode — stronger gravity and limited fuel.
+3. Mars landing — different gravity and atmosphere.
+```
+
+After the student chooses, Chelly builds the smallest working version. Then it
+explains the mechanism and offers the next set of changes:
+
+```text
+What do you want to change next?
+
+1. Make gravity stronger.
+2. Add fuel limits.
+3. Add a landing score.
+```
+
+The point is not to hide all decisions behind AI. The point is to let students
+create quickly while still thinking about cause, effect, and design tradeoffs.
+
+## Creative Coding Direction
+
+Chelly treats art, music, and interaction as first-class STEAM domains.
+
+Most education tools separate "coding" from "art". Chelly should connect them:
+
+- sound-reactive visuals
+- generative patterns
+- motion graphics
+- simple instruments
+- camera and sensor-driven art
+- rhythm, repetition, randomness, and composition
+- interactive installations
+
+The long-term path should feel like an accessible bridge toward tools such as
+TouchDesigner, vvvv, p5.js, Processing, Max/MSP, and creative coding workflows.
+Chelly should not clone those tools. It should help students understand the
+ideas behind them through natural language, working examples, and guided
+modification.
+
+## Current App
+
+Chelly is currently an Expo + React Native app that started from the Android
+prototype. The product direction is now Web/PWA first for Chromebook and
+Windows, with Android kept as the current shell and fallback.
+
+The app currently includes:
+
+- chat-first UI
+- local Gemma-family AI as the default provider
+- Gemini, Claude, Groq, Cerebras, Perplexity, and local server providers as
+  optional advanced choices
+- command safety classification
+- app-private execution bridge for local project files
+- starter STEAM prompts
+- settings for API keys and local model URLs
+
+## Platform Direction
+
+Chelly should be developed first as a Chromebook and Windows Web/PWA studio.
+
+The primary experience should be a large-screen creation workspace:
+
+```text
+Chat / Preview / Code / Run Log / Explain / Tweak
+```
+
+Android remains useful as a prototype shell and ChromeOS fallback, but it
+should not define the main product shape. Local model inference, project file
+writes, and safe command execution should move behind a Local AI Bridge that a
+Web/PWA frontend can use across Chromebook, Windows, and later macOS.
+
+## Runtime Direction
+
+Chelly should not depend on Termux for normal use.
+
+Earlier prototypes assumed Termux-style paths. The current direction is to keep
+runtime files under Chelly's own Android app sandbox:
+
+```text
+/data/data/dev.chelly.app/files/home/chelly
+```
+
+That keeps onboarding closer to:
+
+1. install Chelly
+2. choose a starter lab
+3. make, play, explain, tweak
+4. optionally connect a cloud model for heavier generation
+
+Advanced runtimes such as Python, Node.js, Raspberry Pi bridges, or Arduino
+tooling can be added later as optional adapters. They should not be required
+for the first student experience.
+
+## Safety Model
+
+Chelly is designed for education, so the default mode is conservative:
+
+- AI-proposed local actions are shown as approval cards before execution.
+- Advanced auto-run is OFF by default.
+- Advanced auto-run only skips approval for non-destructive build actions.
+- Destructive actions such as broad deletes, ownership changes, token exposure,
+  publishing, and credential access are blocked even in advanced mode.
+- API keys are stored with `expo-secure-store`.
+- The app workspace lives in Chelly's app-private sandbox by default.
+
+See [SECURITY.md](SECURITY.md) for the detailed model.
+
+## Roadmap
+
+### Web/PWA Studio MVP
+
+- Chromebook and Windows browser/PWA as the primary target
+- large-screen studio layout instead of phone-first chat
+- Starter Lab cards on the empty studio screen
+- Preview / Code / Run Log / Explain / Tweak surfaces
+- local AI as the default path, cloud providers as optional upgrades
+- STEAM-focused system prompt
+- generate small self-contained projects
+- explain code and science after generation
+- development harness for Chromebook and Windows first decisions
+
+### Android Prototype
+
+- Starter Lab cards on the empty chat screen
+- STEAM-focused system prompt
+- app-sandbox workspace instead of Termux paths
+- generate small self-contained projects
+- explain code and science after generation
+
+### Next
+
+- split shared product core from platform shell
+- add Web/PWA studio entry point
+- design Local AI Bridge contract
+- web preview for generated projects
+- age-level selector: Kids, Junior, Teen
+- teacher mode for 45-minute lesson plans
+- project gallery
+- Android sensor labs: microphone, accelerometer, camera/light
+
+### Later
+
+- Web version
+- Desktop version
+- iOS version
+- Raspberry Pi bridge
+- Arduino / micro:bit / ESP32 bridge
+- classroom sharing and worksheets
 
 ## Getting Started
-
-1. Download the latest APK from [Releases](https://github.com/RYOITABASHI/Chelly/releases)
-2. Open Chelly
-3. Get a free Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
-4. Paste it in and start chatting
-
-## Build from Source
 
 ```bash
 git clone https://github.com/RYOITABASHI/Chelly.git
 cd Chelly
 pnpm install
+
+# PC (browser, primary surface) — also reachable from a phone on the same Wi-Fi
+pnpm exec expo start --web --host lan
+# → http://localhost:8081/  (PC)
+# → http://<your-LAN-IP>:8081/  (mobile browser)
+
+# Android APK (full native modules incl. exec-bridge / voice-input)
 npx expo prebuild --platform android
 cd android && ./gradlew :app:assembleDebug
 ```
 
+See [docs/testing.md](docs/testing.md) for the full PC + mobile test workflow,
+firewall notes, and a surface-vs-feature matrix.
+
 ## Tech Stack
 
-Expo 54, React Native 0.81, TypeScript, NativeWind, Zustand, JNI (C/Kotlin)
+Expo 54, React Native 0.81, TypeScript, NativeWind, Zustand, JNI, Kotlin, C.
+
+## Related Projects
+
+- [Shelly](https://github.com/RYOITABASHI/Shelly) — native Android AI terminal IDE
+- [Nacre](https://github.com/RYOITABASHI/Nacre) — mobile developer keyboard IME
 
 ## License
 
 [MIT](LICENSE)
-
-## Related Projects
-
-- [Shelly](https://github.com/RYOITABASHI/Shelly) — Mobile terminal app (Chelly's parent project)
-- [Nacre](https://github.com/RYOITABASHI/Nacre) — Developer keyboard IME

@@ -5,7 +5,10 @@ apply plugin: 'expo-module-gradle-plugin'
 android {
     namespace "dev.chelly.voiceinput"
     compileSdk 34
-    defaultConfig { minSdk 24 }
+    defaultConfig {
+        minSdk 24
+        versionName "1.0.0"
+    }
 }
 
 dependencies {

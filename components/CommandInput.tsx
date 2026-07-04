@@ -1,5 +1,6 @@
-import { useState, useRef } from "react";
-import { View, TextInput, Pressable, Text } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Keyboard, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = {
   onSend: (text: string) => void;
@@ -9,7 +10,23 @@ type Props = {
 
 export function CommandInput({ onSend, isStreaming, onCancel }: Props) {
   const [text, setText] = useState("");
+  const [keyboardInset, setKeyboardInset] = useState(0);
   const inputRef = useRef<TextInput>(null);
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+
+    const show = Keyboard.addListener("keyboardDidShow", (event) => {
+      setKeyboardInset(Math.max(0, event.endCoordinates.height - insets.bottom));
+    });
+    const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboardInset(0));
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, [insets.bottom]);
 
   const handleSend = () => {
     const trimmed = text.trim();
@@ -23,23 +40,27 @@ export function CommandInput({ onSend, isStreaming, onCancel }: Props) {
   };
 
   return (
-    <View className="bg-zinc-900 border-t border-zinc-800 px-3 py-2 pb-6">
+    <View
+      className="bg-zinc-950 border-t border-zinc-800 px-3 pt-2"
+      style={{
+        paddingBottom: Math.max(insets.bottom, 12),
+        marginBottom: keyboardInset,
+      }}
+    >
       <View className="flex-row items-end gap-2">
-        {/* Microphone placeholder */}
         <Pressable
-          className="w-10 h-10 items-center justify-center rounded-full bg-zinc-800 active:opacity-60"
+          className="w-10 h-10 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 active:opacity-60"
           accessibilityLabel="Voice input"
         >
-          <Text className="text-zinc-400 text-lg">{"\uD83C\uDF99"}</Text>
+          <Text className="text-zinc-400 text-xs font-bold">mic</Text>
         </Pressable>
 
-        {/* Text input */}
-        <View className="flex-1 bg-zinc-800 rounded-2xl border border-zinc-700/50 px-4 py-2 min-h-[40px] max-h-[120px]">
+        <View className="flex-1 bg-zinc-900 rounded-2xl border border-zinc-800 px-4 py-2 min-h-[40px] max-h-[120px]">
           <TextInput
             ref={inputRef}
             value={text}
             onChangeText={setText}
-            placeholder="何でも聞いてください..."
+            placeholder="作りたい作品や、変えたい動きを書く..."
             placeholderTextColor="#71717a"
             className="text-white text-sm"
             multiline
@@ -49,7 +70,6 @@ export function CommandInput({ onSend, isStreaming, onCancel }: Props) {
           />
         </View>
 
-        {/* Send / Cancel button */}
         {isStreaming ? (
           <Pressable
             onPress={handleCancel}
@@ -63,11 +83,13 @@ export function CommandInput({ onSend, isStreaming, onCancel }: Props) {
             onPress={handleSend}
             disabled={!text.trim()}
             className={`w-10 h-10 items-center justify-center rounded-full active:opacity-60 ${
-              text.trim() ? "bg-indigo-600" : "bg-zinc-700"
+              text.trim() ? "bg-emerald-500" : "bg-zinc-800"
             }`}
             accessibilityLabel="Send"
           >
-            <Text className="text-white text-lg">{"\u2191"}</Text>
+            <Text className={text.trim() ? "text-black text-lg" : "text-zinc-500 text-lg"}>
+              {"\u2191"}
+            </Text>
           </Pressable>
         )}
       </View>

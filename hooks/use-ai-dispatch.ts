@@ -2,8 +2,8 @@
  * hooks/use-ai-dispatch.ts
  *
  * Core AI dispatch hook for Chelly.
- * Routes user messages to LLM providers, parses responses,
- * classifies commands for safety, and executes them.
+ * Routes user messages to LLM providers, parses responses, and converts
+ * proposed local actions into explicit approval cards.
  */
 
 import { useCallback, useRef } from "react";
@@ -11,23 +11,22 @@ import {
   useChatStore,
   type ChatMessage,
   type ChatAgent,
-  type CommandExecution,
 } from "@/store/chat-store";
 import { useSettingsStore } from "@/store/settings-store";
 import { buildSystemPrompt } from "@/lib/system-prompt";
-import { classifyCommand, getBlockMessage } from "@/lib/command-safety";
+import { executeCommandList } from "@/lib/command-executor";
 import { generateId } from "@/lib/id";
-import { execCommand } from "@/modules/exec-bridge";
 import { geminiChatStream, type GeminiMessage } from "@/lib/gemini";
 import { claudeChatStream, type ClaudeMessage } from "@/lib/claude";
 import { groqChatStream, type GroqMessage } from "@/lib/groq";
 import { cerebrasChatStream, type CerebrasMessage } from "@/lib/cerebras";
 import { perplexitySearchStream, type PerplexityMessage } from "@/lib/perplexity";
 import { ollamaChatStream, type OllamaMessage } from "@/lib/local-llm";
+import { browserGemmaChat, type BrowserGemmaMessage } from "@/lib/browser-gemma";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type Provider = "gemini" | "claude" | "groq" | "cerebras" | "perplexity" | "local";
+type Provider = "gemini" | "claude" | "groq" | "cerebras" | "perplexity" | "local" | "browser-gemma";
 
 interface ParsedResponse {
   explanation: string;
@@ -42,7 +41,37 @@ interface SettingsSnapshot {
   cerebrasApiKey: string;
   perplexityApiKey: string;
   localLlmUrl: string;
+  localModel: string;
+  browserGemmaModel: string;
   currentCwd: string;
+  autoApproveActions: boolean;
+}
+
+function missingCredentialMessage(settings: SettingsSnapshot): string | null {
+  switch (settings.activeProvider) {
+    case "gemini":
+      return settings.geminiApiKey
+        ? null
+        : "Gemini APIキーが未設定です。まずSettingsでAPIキーを入れるか、ラボ一覧から「サンプルアートを開く」を使ってAPIキーなしデモを試してください。";
+    case "claude":
+      return settings.claudeApiKey ? null : "Claude APIキーが未設定です。SettingsでAPIキーを設定してください。";
+    case "groq":
+      return settings.groqApiKey ? null : "Groq APIキーが未設定です。SettingsでAPIキーを設定してください。";
+    case "cerebras":
+      return settings.cerebrasApiKey ? null : "Cerebras APIキーが未設定です。SettingsでAPIキーを設定してください。";
+    case "perplexity":
+      return settings.perplexityApiKey ? null : "Perplexity APIキーが未設定です。SettingsでAPIキーを設定してください。";
+    case "local":
+      return settings.localLlmUrl
+        ? null
+        : "Local AIの接続先が未設定です。SettingsでLocal AI URLを設定してください。";
+    case "browser-gemma":
+      return settings.browserGemmaModel
+        ? null
+        : "Browser Gemma modelが未設定です。SettingsでモデルIDを設定してください。";
+    default:
+      return null;
+  }
 }
 
 // ─── Provider routing ───────────────────────────────────────────────────────
@@ -155,13 +184,30 @@ async function routeToProvider(
       ];
       const result = await ollamaChatStream(
         settings.localLlmUrl,
-        "default",
+        settings.localModel || "gemma4:latest",
         systemPrompt,
         localHistory,
         (text) => onChunk(text),
         signal,
       );
       if (!result.success) throw new Error(result.error ?? "Local LLM request failed.");
+      break;
+    }
+
+    case "browser-gemma": {
+      const browserHistory: BrowserGemmaMessage[] = history.map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      }));
+      const result = await browserGemmaChat(
+        settings.browserGemmaModel,
+        systemPrompt,
+        browserHistory,
+        userMessage,
+        (text) => onChunk(text),
+        signal,
+      );
+      if (!result.success) throw new Error(result.error ?? "Browser Gemma request failed.");
       break;
     }
 
@@ -224,58 +270,6 @@ function tryParseCommands(response: string): ParsedResponse | null {
   return null;
 }
 
-// ─── Command execution ──────────────────────────────────────────────────────
-
-/**
- * Execute a list of commands with safety classification.
- * BLOCKED commands are skipped. DESTRUCTIVE commands are logged but still
- * executed (confirmation UI will be wired in a later task).
- */
-async function executeCommands(
-  commands: Array<{ cmd: string; desc: string }>,
-  cwd: string,
-): Promise<CommandExecution[]> {
-  const results: CommandExecution[] = [];
-
-  for (const { cmd, desc } of commands) {
-    const safety = classifyCommand(cmd);
-
-    if (safety === "BLOCKED") {
-      results.push({
-        command: cmd,
-        output: getBlockMessage(),
-        exitCode: 1,
-        isCollapsed: false,
-      });
-      continue;
-    }
-
-    if (safety === "DESTRUCTIVE") {
-      console.warn(`[AI Dispatch] Executing destructive command: ${cmd}`);
-    }
-
-    try {
-      const result = await execCommand(cmd, cwd, 30000);
-      const output = [result.stdout, result.stderr].filter(Boolean).join("\n");
-      results.push({
-        command: cmd,
-        output: output || "(no output)",
-        exitCode: result.exitCode,
-        isCollapsed: false,
-      });
-    } catch (err) {
-      results.push({
-        command: cmd,
-        output: err instanceof Error ? err.message : String(err),
-        exitCode: 1,
-        isCollapsed: false,
-      });
-    }
-  }
-
-  return results;
-}
-
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export function useAiDispatch() {
@@ -308,6 +302,17 @@ export function useAiDispatch() {
       agent: settings.activeProvider as ChatAgent,
     };
     chatStore.addMessage(session.id, assistantMsg);
+
+    const credentialError = missingCredentialMessage(settings);
+    if (credentialError) {
+      chatStore.updateMessage(session.id, assistantId, {
+        content: credentialError,
+        isStreaming: false,
+        streamingText: undefined,
+        agent: settings.activeProvider as ChatAgent,
+      });
+      return;
+    }
 
     // 3. Build context (last 20 messages, 500 char truncation)
     const history = session.messages.slice(-20).map((m) => ({
@@ -344,14 +349,25 @@ export function useAiDispatch() {
       const parsed = tryParseCommands(fullResponse);
 
       if (parsed && parsed.commands.length > 0) {
-        // Has commands — execute them
-        const executions = await executeCommands(
-          parsed.commands,
-          settings.currentCwd,
-        );
+        if (settings.autoApproveActions) {
+          const executions = await executeCommandList(parsed.commands, settings.currentCwd);
+          chatStore.updateMessage(session.id, assistantId, {
+            content: parsed.explanation || fullResponse,
+            executions,
+            isStreaming: false,
+            streamingText: undefined,
+          });
+          return;
+        }
+
+        // Education mode is approval-first by default: the AI may propose
+        // actions, but Chelly does not execute them until explicit approval.
         chatStore.updateMessage(session.id, assistantId, {
           content: parsed.explanation || fullResponse,
-          executions,
+          safetyConfirm: {
+            commands: parsed.commands,
+            status: "pending",
+          },
           isStreaming: false,
           streamingText: undefined,
         });
